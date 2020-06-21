@@ -1,14 +1,9 @@
-'use strict'
-
-
 /**
  * Singleton for holding the shared constants. 
  */
-var Constance = (function() {
-    var me = {};
-
+class Constance {
      // Enumeration of the spec form sections.
-    me.SECTIONS = {
+    public static readonly SECTIONS: any = {
         CONFIG: 'CONFIG',
         MESSAGES: 'MESSAGES',
         PROCESSINGS: 'PROCESSINGS',
@@ -16,7 +11,7 @@ var Constance = (function() {
     };
 
     // Enumeration of the labels to use for the spec form elements.
-    me.LABELS = {
+    public static readonly LABELS: any = {
         CONFIG: {
             minZoomWidth: 'min full-sized image width',
             minZoomHeight: 'minimum full-sized image height',
@@ -49,14 +44,14 @@ var Constance = (function() {
     };
     
     // These are the default spec values.
-    var cannedConfig = {
+    public static readonly cannedConfig: any = {
         minZoomWidth: '300',
         minZoomHeight: '300',
         dlChannels: '5',
         dlBatchSize: '5',
         knownBadImgRegex: '/\\/(logo\\.|loading|header\\.jpg|premium_|preview\\.png|holder-trailer-home\\.jpg|logo-mobile-w\\.svg|logo\\.svg|logo-desktop-w\\.svg|user\\.svg|speech\\.svg|folder\\.svg|layers\\.svg|tag\\.svg|video\\.svg|favorites\\.svg|spinner\\.svg|preview\\.jpg)/i',
     };
-    var cannedProcessings = [
+    public static readonly cannedProcessings: Array<any> = [
         {
             match: 'fakeexample.fake',
             actions: [
@@ -77,7 +72,7 @@ var Constance = (function() {
             scrape: false,
         }
     ];
-    var cannedMessages = [
+    public static readonly cannedMessages: Array<any> = [
         {
             match: 'fakeexample.fake',
             link: 'a.link[href]',
@@ -86,7 +81,7 @@ var Constance = (function() {
             src: 'dataset.src',
         }
     ];
-    var cannedBlessings = [
+    public static readonly cannedBlessings:Array<any> = [
         {
             match: 'fakeexample.fake',
             zoom: 'img.zoomed',
@@ -95,45 +90,64 @@ var Constance = (function() {
     ];
 
     // The default spec, used if there is nothing in storage yet.
-    me.DEFAULT_SPEC = {
-        config: cannedConfig,
-        messages: cannedMessages,
-        processings: cannedProcessings,
-        blessings: cannedBlessings,
+    public static readonly DEFAULT_SPEC: any = {
+        config: Constance.cannedConfig,
+        messages: Constance.cannedMessages,
+        processings: Constance.cannedProcessings,
+        blessings: Constance.cannedBlessings,
     };
-
-
-    return me;
- })();
+ };
 
 
 /**
  * Singleton which handles layout and serialization to and from the HTML5 form
  * for the options spec values.
  */
-var Dominatrix = (function Dominatrix(doc, C) {
-    var me = {};
-    
+class Dominatrix {
+    // We're a singleton.
+    private static instance: Dominatrix = new Dominatrix(document);
+
     // Counters used in creating unique element ids.
-    var entryCounter = 0;
-    var subEntryCounter = 0;
+    private entryCounter: number = 0;
+    private subEntryCounter: number = 0;
     
     // Id prefixes for unique element ids, and classnames for entry holder <div>s. 
-    var ENTRY_DIV_ID_PREFIX = 'entry_';
-    var SUB_ENTRY_DIV_ID_PREFIX = 'subentry_';
-    var VALUE_ID_PREFIX = 'value_';
-    var ADD_SUB_ENTRY_ID_PREFIX = 'addsubentry_';
-    var ENTRY_CLASS = 'entry';
-    var SUB_ENTRY_CLASS = 'subentry';
-    var DELETE_BUTTON_CLASS = 'delete';
-    var ADD_SUB_ENTRY_CLASS = 'addSubentry';
+    public static readonly ENTRY_DIV_ID_PREFIX = 'entry_';
+    public static readonly SUB_ENTRY_DIV_ID_PREFIX = 'subentry_';
+    public static readonly VALUE_ID_PREFIX = 'value_';
+    public static readonly ADD_SUB_ENTRY_ID_PREFIX = 'addsubentry_';
+    public static readonly ENTRY_CLASS = 'entry';
+    public static readonly SUB_ENTRY_CLASS = 'subentry';
+    public static readonly DELETE_BUTTON_CLASS = 'delete';
+    public static readonly ADD_SUB_ENTRY_CLASS = 'addSubentry';
+  
+    // Members holding the document and its configuration sections.
+    // populated in constructor.
+    public SECTION_ELEMENTS: any;    
+    public doc: Document;
 
-    // Enumeration of section holder <div>s that exist on the options form page.
-    var SECTION_ELEMENTS = {
-        CONFIG: doc.getElementById(C.SECTIONS.CONFIG),
-        MESSAGES: doc.getElementById(C.SECTIONS.MESSAGES),
-        PROCESSINGS: doc.getElementById(C.SECTIONS.PROCESSINGS),
-        BLESSINGS: doc.getElementById(C.SECTIONS.BLESSINGS),
+
+    /**
+     * Private constructor. It looks up and stores our parts of the document.
+     * @param d 
+     */
+    private constructor(d: Document) {
+        this.doc = d;
+
+        this.SECTION_ELEMENTS = {
+            CONFIG: this.doc.getElementById(Constance.SECTIONS.CONFIG),
+            MESSAGES: this.doc.getElementById(Constance.SECTIONS.MESSAGES),
+            PROCESSINGS: this.doc.getElementById(Constance.SECTIONS.PROCESSINGS),
+            BLESSINGS: this.doc.getElementById(Constance.SECTIONS.BLESSINGS),
+        }
+    }
+
+
+    /**
+     * Getter for the singleton instance.
+     */
+    public static getInstance(): Dominatrix {
+        return this.instance;
     }
 
 
@@ -145,41 +159,41 @@ var Dominatrix = (function Dominatrix(doc, C) {
      * @param {*} isSubEntry Flag used for recursion.
      * @param {*} insertionRefNode DOM node before which to insert the entry.
      */
-    function addEntry(values, section, isSubEntry, insertionRefNodeId) {
-        var div = doc.createElement('div');
+    public addEntry(values: any[], section: HTMLDivElement, isSubEntry?: boolean, insertionRefNodeId?: (string|undefined)): string {
+        let div: HTMLDivElement = this.doc.createElement('div');
 
         if (isSubEntry) {
-            div.id = SUB_ENTRY_DIV_ID_PREFIX + (subEntryCounter++);
-            div.className = SUB_ENTRY_CLASS;
+            div.id = Dominatrix.SUB_ENTRY_DIV_ID_PREFIX + (this.subEntryCounter++);
+            div.className = Dominatrix.SUB_ENTRY_CLASS;
         }
         else {
-            div.id = ENTRY_DIV_ID_PREFIX + (entryCounter++);
-            div.className = ENTRY_CLASS;
+            div.id = Dominatrix.ENTRY_DIV_ID_PREFIX + (this.entryCounter++);
+            div.className = Dominatrix.ENTRY_CLASS;
         }
 
         if (Array.isArray(values)) {
             // This variable is for a closure. Do not delete.
-            var valueLength = values.length;
+            let valueLength: number = values.length;
             
-            for (var i = 0; i < values.length; i++) {
-                var value = values[i];
+            for (let i: number = 0; i < values.length; i++) {
+                var value: any = values[i];
 
                 if (!value) {
                     continue;
                 }
 
-                var label = (!!value.label ? doc.createElement('label') : false);
-                var valueId = div.id + '_' + VALUE_ID_PREFIX + i;
+                let label: (HTMLLabelElement|boolean) = (!!value.label ? this.doc.createElement('label') : false);
+                let valueId: string = div.id + '_' + Dominatrix.VALUE_ID_PREFIX + i;
 
                 // Create and append the label if we were told to label this.
                 if (!!label) {
                     label.textContent = value.label;
-                    label.for = valueId;
+                    label.htmlFor = valueId;
                     div.appendChild(label);
                 }
 
                 // Create the input that represents the value.
-                var input = doc.createElement('input');
+                let input: HTMLInputElement = this.doc.createElement('input');
                 input.id = valueId;
                 input.name = valueId;
                 input.dataset.key = value.key;
@@ -190,7 +204,7 @@ var Dominatrix = (function Dominatrix(doc, C) {
                 // For array values, use the div id of the subentry.
                 if (('values' in value) && Array.isArray(value.values)) {
                     // Now recurse to add the subentry values.
-                    var subEntryId = addEntry(value.values, div, true);
+                    let subEntryId = this.addEntry(value.values, div, true, undefined);
                     input.type = 'hidden';                    
                     inputValue = subEntryId;
                     
@@ -198,32 +212,34 @@ var Dominatrix = (function Dominatrix(doc, C) {
                     // button after the last subentry value in the array. 
                     if ((i+1) === values.length || values[i+1].key !== value.key) {
                         // Wrap this in an IIFE to avoid closure problems.
-                        (function buildAddSubEntryButton(d, rootNode, val, refEntryId) {  
-                            var refNode = d.getElementById(refEntryId);
+                        ((d, rootNode, val, refEntryId) => {  
+                            let refNode: (HTMLElement|null) = d.getElementById(refEntryId);
 
                             // Build the 'add subentry' button, and insert it into the <div>.
-                            var addSubEntry = d.createElement('button');
-                            addSubEntry.id = ADD_SUB_ENTRY_ID_PREFIX + i;
-                            addSubEntry.className = ADD_SUB_ENTRY_CLASS;
+                            let addSubEntry: HTMLButtonElement = d.createElement('button');
+                            addSubEntry.id = Dominatrix.ADD_SUB_ENTRY_ID_PREFIX + i;
+                            addSubEntry.className = Dominatrix.ADD_SUB_ENTRY_CLASS;
                             addSubEntry.textContent = 'add subentry';
                             rootNode.insertBefore(addSubEntry, refNode);                                                
 
                             // Create the 'add subentry' click handler. It creates a new label for the 
                             // subentry section, adds the subentry by copying an existing subentry's values,
                             // and creates the needed hidden element that points to it.
-                            addSubEntry.addEventListener('click', function() {
-                                // Create the label.
-                                var newLabel = (!!val.label ? d.createElement('label') : false);
-                                var newValueId = rootNode.id + '_' + VALUE_ID_PREFIX + (i++);
-                                if (!!newLabel) {
+                            addSubEntry.addEventListener('click', () => {
+                                // new subentry's id                                
+                                let newValueId = rootNode.id + '_' + Dominatrix.VALUE_ID_PREFIX + (i++);
+                                
+                                // Make it a label if needed.
+                                if (!!val.label) {
+                                    let newLabel: HTMLLabelElement = d.createElement('label');
                                     newLabel.id = 'label_' + newValueId
                                     newLabel.textContent = val.label;
-                                    newLabel.for = newValueId;
+                                    newLabel.htmlFor = newValueId;
                                     rootNode.insertBefore(newLabel, addSubEntry); 
                                 }
 
                                  // Create the hidden input that points to this subentry.
-                                 var newInput = d.createElement('input');
+                                 let newInput: HTMLInputElement = d.createElement('input');
                                  newInput.id = newValueId;
                                  newInput.type = 'hidden';
                                  newInput.name = newValueId;
@@ -231,18 +247,22 @@ var Dominatrix = (function Dominatrix(doc, C) {
                                  rootNode.insertBefore(newInput, addSubEntry);
                                 
                                 // Add the subentry to the <div>.
-                                var addedSubentryId = addEntry(val.values, rootNode, true, newValueId);
+                                let addedSubentryId = this.addEntry(val.values, rootNode, true, newValueId);
                                 newInput.value = addedSubentryId;
 
                                 // Unhide all the subentries' delete buttons in the section.
-                                var deleteButtons = div.parentNode.querySelectorAll(':scope button.' + DELETE_BUTTON_CLASS);
-                                deleteButtons.forEach(function showButton(dButton) {
-                                    if (dButton.parentNode.className === SUB_ENTRY_CLASS) {
-                                        dButton.style.display = '';
-                                    }
-                                });
+                                let deleteButtons: (NodeListOf<HTMLButtonElement>|undefined) = 
+                                    div.parentNode?.querySelectorAll<HTMLButtonElement>(':scope button.' + Dominatrix.DELETE_BUTTON_CLASS);
+
+                                if (!!deleteButtons) {
+                                    deleteButtons.forEach(function showButton(dButton: HTMLButtonElement) {
+                                        if (!!dButton.parentNode && dButton.parentElement?.className === Dominatrix.SUB_ENTRY_CLASS) {
+                                            dButton.style.display = '';
+                                        }
+                                    });
+                                }
                             });
-                        })(doc, div, value, subEntryId);
+                        })(this.doc, div, value, subEntryId);
                     }
                 }
                 // For scalar values, use value.text or the value itself.
@@ -255,24 +275,27 @@ var Dominatrix = (function Dominatrix(doc, C) {
 
             // Create a delete button for the entry/subentry. If we're dealing with the first
             // subentry of a list of subentries, do not create a delete button for it.
-            var deleteButton = doc.createElement('button');
+            let deleteButton = this.doc.createElement('button');
             deleteButton.textContent = 'X';
-            deleteButton.className = DELETE_BUTTON_CLASS;
+            deleteButton.className = Dominatrix.DELETE_BUTTON_CLASS;
             deleteButton.addEventListener('click', function onDeleteButtonClick() {
                 // Remove the subentry title (like 'actions'), then the hidden input
                 // for the subentry, then the subentry itself.
-                if (div.previousSibling.value === div.id) {
-                    div.previousSibling.previousSibling.remove();
+                if (!!div.previousElementSibling && (div.previousElementSibling as HTMLInputElement).value === div.id) {
+                    div.previousElementSibling.previousSibling?.remove();
                     div.previousElementSibling.remove();
                 }
                 div.remove();
 
                 // If there is only 1 subentry left, find it and hide its delete button.
                 // otherwise, show all the subentries' delete buttons.
-                var remainingSubentries = section.querySelectorAll(':scope div.' + SUB_ENTRY_CLASS);
+                let remainingSubentries: NodeListOf<HTMLDivElement> = section.querySelectorAll(':scope div.' + Dominatrix.SUB_ENTRY_CLASS);
                 if (remainingSubentries.length === 1) {
-                    var deleteButton = remainingSubentries[0].querySelector(':scope button.' + DELETE_BUTTON_CLASS);
-                    deleteButton.style.display = 'none';
+                    let deleteButton: (Node|null) = remainingSubentries[0].querySelector(':scope button.' + Dominatrix.DELETE_BUTTON_CLASS);
+                    
+                    if (deleteButton != null) {
+                        (deleteButton as HTMLElement).style.display = 'none';
+                    }
                 }
             });
             
@@ -284,14 +307,14 @@ var Dominatrix = (function Dominatrix(doc, C) {
         // just add it to the end of the doc if no section was given.
         if (!!section) {
             if (!!insertionRefNodeId) {
-                section.insertBefore(div, doc.getElementById(insertionRefNodeId));
+                section.insertBefore(div, this.doc.getElementById(insertionRefNodeId));
             }
             else {
                 section.appendChild(div);
             }
         }
         else {
-            doc.body.appendChild(div);
+            this.doc.body.appendChild(div);
         }
 
         // return the new entry's id.
@@ -302,17 +325,17 @@ var Dominatrix = (function Dominatrix(doc, C) {
     /**
      * Add form fields for the config values.
      */
-    me.insertConfigEntry = function insertConfigEntry(configEntry) {
-        var entryId = addEntry(configEntry, SECTION_ELEMENTS.CONFIG);
+    public insertConfigEntry(configEntry: any): string {
+        var entryId = this.addEntry(configEntry, this.SECTION_ELEMENTS.CONFIG);
         return entryId;
-    };
+    }
 
 
     /**
      * Add form fields for a single message.
      */
-    me.insertMessageEntry = function insertMessageEntry(messageEntry) {
-        var entryId = addEntry(messageEntry, SECTION_ELEMENTS.MESSAGES);
+    public insertMessageEntry(messageEntry: any): string {
+        var entryId = this.addEntry(messageEntry, this.SECTION_ELEMENTS.MESSAGES);
         return entryId;
     };
 
@@ -320,8 +343,8 @@ var Dominatrix = (function Dominatrix(doc, C) {
     /**
      * Add populated form fields for a single processing.
      */
-    me.insertProcessingEntry = function insertProcessingEntry(processingEntry) {
-        var entryId = addEntry(processingEntry, SECTION_ELEMENTS.PROCESSINGS);
+    public insertProcessingEntry(processingEntry: any): string {
+        var entryId = this.addEntry(processingEntry, this.SECTION_ELEMENTS.PROCESSINGS);
         return entryId;
     };
 
@@ -329,8 +352,8 @@ var Dominatrix = (function Dominatrix(doc, C) {
     /**
      * Add populated form fields for a single blessing.
      */
-    me.insertBlessingEntry = function insertBlessingEntry(blessingEntry) {
-        var entryId = addEntry(blessingEntry, SECTION_ELEMENTS.BLESSINGS);
+    public insertBlessingEntry(blessingEntry: any): string {
+        var entryId = this.addEntry(blessingEntry, this.SECTION_ELEMENTS.BLESSINGS);
         return entryId;
     };
 
@@ -341,41 +364,46 @@ var Dominatrix = (function Dominatrix(doc, C) {
      * 
      * @param {*} root The root element for the section containing the entry.
      */
-    function getEntry(root) {
-        var entry = {};
-        var textInputs = [];
-        var hiddenInputs = [];
+    public getEntry(root: HTMLDivElement): HTMLDivElement {
+        let entry: HTMLDivElement = new HTMLDivElement();
+        let textInputs: Array<HTMLInputElement> = [];
+        let hiddenInputs: Array<HTMLInputElement> = [];
 
         // Sort out the text inputs and hidden inputs.
-        root.childNodes.forEach(function sortInputs(child) {
+        for (let i: number = 0; i < root.children.length; i++) { 
+            let child = root.children[i];
+
             if (child.nodeName === 'INPUT') {
-                if (child.type === 'text') {
-                    textInputs.push(child);
+                let inputType = child.getAttribute('type');
+                let inputEl = (child as HTMLInputElement);
+
+                if (inputType === 'text') {
+                    textInputs.push(inputEl);
                 }
-                else if (child.type === 'hidden') {
-                    hiddenInputs.push(child);
+                else if (inputType === 'hidden') {
+                    hiddenInputs.push(inputEl);
                 }
             }
-        });
+        }
 
-        textInputs.forEach(function addToConfig(input) {
+        textInputs.forEach((input: HTMLInputElement) => {
             if (input.dataset.key) {
-                entry[input.dataset.key] = input.value;
+                (entry as any)[input.dataset.key] = input.value;
             }
         });
 
-        hiddenInputs.forEach(function getSubEntry(input) {
+        hiddenInputs.forEach((input: HTMLInputElement) => {
             if (input.dataset.key) {
                 if (!(input.dataset.key in entry)) {
-                    entry[input.dataset.key] = [];
+                    (entry as any)[input.dataset.key] = [];
                 }
-                else if (!Array.isArray(entry[input.dataset.key])) {
-                    entry[input.dataset.key] = [ entry[input.dataset.key] ];
+                else if (!Array.isArray((entry as any)[input.dataset.key])) {
+                    (entry as any)[input.dataset.key] = [ (entry as any)[input.dataset.key] ];
                 }
 
-                var subEntry = input.nextSibling;
-                if (!!subEntry && subEntry.className === SUB_ENTRY_CLASS) {
-                    entry[input.dataset.key].push(getEntry(subEntry));
+                let subEntry: HTMLDivElement = (input.nextElementSibling as HTMLDivElement);
+                if (!!subEntry && subEntry.className === Dominatrix.SUB_ENTRY_CLASS) {
+                    (entry as any)[input.dataset.key].push(this.getEntry(subEntry));
                 }
             }
         });
@@ -389,18 +417,19 @@ var Dominatrix = (function Dominatrix(doc, C) {
      * 
      * @param {*} section Spec section whose objects are being asked for.
      */
-    function getEntries(section) {
-        var entries = [];
-        var divs = [];
-        
-        section.childNodes.forEach(function sortOutEntryDivs(child) {
-            if (child.nodeName === 'DIV' && child.className === ENTRY_CLASS) {
-                divs.push(child);
+     public getEntries(section: HTMLDivElement): Array<HTMLDivElement> {
+        let entries = new Array<HTMLDivElement>();
+        let divs = new Array<HTMLDivElement>();
+    
+        for (let i: number = 0; i < section.children.length; i++) {
+            let child: HTMLElement = (section.children[i] as HTMLElement);
+            if (child.nodeName === 'DIV' && child.className === Dominatrix.ENTRY_CLASS) {
+                divs.push((child as HTMLDivElement));
             }
-        });
+        }
 
-        divs.forEach(function addEachEntry(div) {
-            entries.push(getEntry(div));
+        divs.forEach((div: HTMLDivElement) => {
+            entries.push((this.getEntry(div) as HTMLDivElement));
         });
 
         return entries;
@@ -410,46 +439,50 @@ var Dominatrix = (function Dominatrix(doc, C) {
     /**
      * Return the object representing the config section of the options form.
      */
-    me.getConfig = function getConfig() {
-        return getEntry(SECTION_ELEMENTS.CONFIG);
+    public getConfig(): HTMLDivElement {
+        return this.getEntry(this.SECTION_ELEMENTS.CONFIG);
     };
 
     
     /**
      * Return the serialized array of messages from the options form.
      */
-    me.getMessageEntries = function getMessageEntries() {
-        return getEntries(SECTION_ELEMENTS.MESSAGES);
+    public getMessageEntries(): Array<HTMLDivElement> {
+        return this.getEntries(this.SECTION_ELEMENTS.MESSAGES);
     };
 
 
     /**
      * Return the serialized array of processings from the options form.
      */
-    me.getProcessingEntries = function getProcessingEntries() {
-        return getEntries(SECTION_ELEMENTS.PROCESSINGS);
+    public getProcessingEntries(): Array<HTMLDivElement> {
+        return this.getEntries(this.SECTION_ELEMENTS.PROCESSINGS);
     };
 
 
     /**
      * Return the serialized array of blessings from the options form.
      */
-    me.getBlessingEntries = function getBlessingEntries() {
-        return getEntries(SECTION_ELEMENTS.BLESSINGS);
+    public getBlessingEntries(): Array<HTMLDivElement> {
+        return this.getEntries(this.SECTION_ELEMENTS.BLESSINGS);
     };
-
-
-    return me;
-})(window.document, Constance);
+}
 
 
 /**
  * Singleton which handles getting, setting, and processing the options spec values
  * to/from storage.
  */
-var Optionator = (function Optionator(doc, dmx, C) {
+class Optionator {
+    // The singleton instance
+    private static instance: Optionator = new Optionator(document);
+
+    // Refs
+    private doc: Document;
+    private dmx: Dominatrix = Dominatrix.getInstance();
+
     // The returned object. Merely the tracking ids of the form elements.
-    var me = {
+    public trackingIds: any = {
         ids: {
             CONFIG: [],
             MESSAGES: [],
@@ -459,27 +492,69 @@ var Optionator = (function Optionator(doc, dmx, C) {
     };
 
     // Enumeration of the DOM insertion functions.
-    var INSERT_FUNCS = {
-        CONFIG: dmx.insertConfigEntry,
-        MESSAGES: dmx.insertMessageEntry,
-        PROCESSINGS: dmx.insertProcessingEntry,
-        BLESSINGS: dmx.insertBlessingEntry,
+    public INSERT_FUNCS: any = {
+        CONFIG: this.dmx.insertConfigEntry,
+        MESSAGES: this.dmx.insertMessageEntry,
+        PROCESSINGS: this.dmx.insertProcessingEntry,
+        BLESSINGS: this.dmx.insertBlessingEntry,
     };
+
+    /**
+     * A singleton, so private constructor.
+     * 
+     * @param d The options.html document
+     */
+    private constructor(d: Document) {
+        this.doc = d;
+
+        // Do setup on DOMContentLoaded.
+        this.doc.addEventListener('DOMContentLoaded', () => {
+            // Load the spec from storage, and trigger the layout.
+            this.getSpec();
+
+            // Hook up the event handlers for each section's "Add" button on DOMContentLoaded.
+            let buttons = (this.doc.querySelectorAll('button.addEntry') as NodeListOf<HTMLButtonElement>);
+            buttons.forEach((button: HTMLButtonElement) => {
+                button.addEventListener('click', () => {
+                    if (!!button.parentElement) {
+                        let section: string = button.parentElement.id;
+                        this.layoutSpecSection(Constance.SECTIONS[section], Constance.DEFAULT_SPEC[section.toLowerCase()]);
+                    }
+                });
+            });
+
+            // Hook up the "set" button.
+            let setButton: (HTMLElement|null) = this.doc.getElementById('set');
+            if (!!setButton && setButton !== null) {
+                setButton.addEventListener('click', this.setSpec);
+            }
+        });
+    }
+
+
+    /**
+     * The singleton getter.
+     */
+    public getInstance(): Optionator {
+        return Optionator.instance;
+    }
 
 
     /**
      * Get the options from storage, if they're there. Use the default spec
      * if nothing is in storage yet.
      */
-    function getSpec() {
+    public getSpec(): void {
+        let me: Optionator = this;
+
         chrome.storage.sync.get({
-                spec: C.DEFAULT_SPEC
+                spec: Constance.DEFAULT_SPEC
             }, 
             function storageRetrieved(store) {
-                layoutConfig(store.spec.config);
-                layoutMessages(store.spec.messages);
-                layoutProcessings(store.spec.processings);
-                layoutBlessings(store.spec.blessings);
+                me.layoutConfig(store.spec.config);
+                me.layoutMessages(store.spec.messages);
+                me.layoutProcessings(store.spec.processings);
+                me.layoutBlessings(store.spec.blessings);
             }
         );
     }
@@ -489,13 +564,13 @@ var Optionator = (function Optionator(doc, dmx, C) {
      * Set the values typed into the textarea. If it does not parse, then 
      * say so in the status and do not actually set.
      */
-    function setSpec() {
-        var spec = {};
+    public setSpec(): void {
+        let spec: any = {};
 
-        spec.config = dmx.getConfig();
-        spec.messages = dmx.getMessageEntries();
-        spec.processings = dmx.getProcessingEntries();
-        spec.blessings = dmx.getBlessingEntries();
+        spec.config = this.dmx.getConfig();
+        spec.messages = this.dmx.getMessageEntries();
+        spec.processings = this.dmx.getProcessingEntries();
+        spec.blessings = this.dmx.getBlessingEntries();
 
         console.log('Trying to set spec:');
         console.log(JSON.stringify(spec));
@@ -505,12 +580,19 @@ var Optionator = (function Optionator(doc, dmx, C) {
                 spec: spec,
             },
             function storageSet() {
-                var statusDiv = doc.getElementById('status');
-                statusDiv.style.display = 'block';
+                let statusDiv: (HTMLElement|null) = Optionator.instance.doc.getElementById('status');
 
-                setTimeout(function clearMessage() {
-                    statusDiv.style.display = 'none';
-                }, 5000);
+                // Show the "successfully set" message, then hide it again in 5 seconds.
+                if (!!statusDiv && statusDiv != null) {
+                    statusDiv.style.display = 'block';
+
+                    setTimeout(function clearMessage() {
+                        let statusDiv: (HTMLElement|null) = Optionator.instance.doc.getElementById('status');
+                        if (!!statusDiv && statusDiv != null) {
+                            statusDiv.style.display = 'none';
+                        }
+                    }, 5000);
+                }
             }
         );
     }
@@ -523,24 +605,24 @@ var Optionator = (function Optionator(doc, dmx, C) {
      * @param {*} section Section of the spec, using SECTIONS enum
      * @param {*} objects Objects existing in that spec section
      */
-    function layoutSpecSection(section, objects) {
+    public layoutSpecSection(section: any, objects: Array<any>) {
         // For each of the section objects, process and lay it out.
-        objects.forEach(function createObjectEntry(obj) {
-            var objEntry = [];
+        objects.forEach((obj: any) => {
+            let objEntry: Array<any> = new Array<any>();
 
             // For each key/value pair in the section object, add it to the objEntry.
-            Object.keys(obj).forEach(function processObjectValue(key) {
+            Object.keys(obj).forEach((key: string) => {
                 // Some values are arrays of objects. Process them into arrays of label,
                 // text, key sets. 
                 if (Array.isArray(obj[key])) {
                     // For each of the subarray objects, process it.
-                    obj[key].forEach(function addSubObjectValue(subObj) {
-                        var subValues = [];
+                    obj[key].forEach((subObj: any) => {
+                        let subValues: any = new Array<any>();
                         
                         // Similarly to the main forEach(), process each subobject key/value pair.
                         // (Could probably be recursive here.)
-                        Object.keys(subObj).forEach(function processSubObjValue(subKey) {
-                            var subLabel = (C.LABELS[section][key + '_' + subKey] || '');
+                        Object.keys(subObj).forEach((subKey: string) => {
+                            var subLabel = (Constance.LABELS[section][key + '_' + subKey] || '');
                             var subText = (subObj[subKey] || '');
 
                             subValues.push({
@@ -552,7 +634,7 @@ var Optionator = (function Optionator(doc, dmx, C) {
 
                         // Add the values array to the object entry.
                         objEntry.push({
-                            label: C.LABELS[section][key],
+                            label: Constance.LABELS[section][key],
                             values: subValues,
                             key: key,
                         });
@@ -561,7 +643,7 @@ var Optionator = (function Optionator(doc, dmx, C) {
                 // Scalar values are simpler. Just process out their label, text, and key. 
                 // Then put them in the object entry.
                 else {
-                    var label = (C.LABELS[section][key] || '');
+                    var label = (Constance.LABELS[section][key] || '');
                     var text = (obj[key] || '');
 
                     var valueObj = {
@@ -580,8 +662,8 @@ var Optionator = (function Optionator(doc, dmx, C) {
             });
 
             // Call the proper Dominatrix layout function, and add the id to our tracking object.
-            var entryId = INSERT_FUNCS[section](objEntry);
-            me.ids[section].push(entryId);
+            var entryId = this.INSERT_FUNCS[section](objEntry);
+            this.trackingIds.ids[section].push(entryId);
         });
     }
 
@@ -590,8 +672,8 @@ var Optionator = (function Optionator(doc, dmx, C) {
      * Create and populate the fields for spec.config. This is a single object
      * full of one-off configuration properties.
      */
-    function layoutConfig(config) {
-        layoutSpecSection(C.SECTIONS.CONFIG, [config]);
+    public layoutConfig(config: any): void {
+        this.layoutSpecSection(Constance.SECTIONS.CONFIG, [config]);
     }
 
 
@@ -601,8 +683,8 @@ var Optionator = (function Optionator(doc, dmx, C) {
      * link, and href values for a gallery item on a page that matches the "match" key's
      * regular expression.
      */
-    function layoutMessages(messages) {
-        layoutSpecSection(C.SECTIONS.MESSAGES, messages);
+    public layoutMessages(messages: any): void {
+        this.layoutSpecSection(Constance.SECTIONS.MESSAGES, messages);
     }
 
 
@@ -612,8 +694,8 @@ var Optionator = (function Optionator(doc, dmx, C) {
      * the content-script's galleryMap. Each holds a "match" regexp for the uri, "doDig", 
      * "doScrape", and array of "actions" of varying types.
      */
-    function layoutProcessings(processings) {
-        layoutSpecSection(C.SECTIONS.PROCESSINGS, processings);
+    public layoutProcessings(processings: any): void {
+        this.layoutSpecSection(Constance.SECTIONS.PROCESSINGS, processings);
     }
 
 
@@ -623,28 +705,7 @@ var Optionator = (function Optionator(doc, dmx, C) {
      * a gallery item. Each holds a "match" regexp for the uri, and a css selector "zoom" for
      * the zoom item, and a "src" prop for the direct link to the resource.
      */
-    function layoutBlessings(blessings) {
-        layoutSpecSection(C.SECTIONS.BLESSINGS, blessings);
-    }
-
-
-    // Do setup on DOMContentLoaded.
-    doc.addEventListener('DOMContentLoaded', function onDomContentLoaded() {
-        // Load the spec from storage, and trigger the layout.
-        getSpec();
-
-        // Hook up the event handlers for each section's "Add" button on DOMContentLoaded.
-        doc.querySelectorAll('button.addEntry').forEach(function addNewEntry(button) {
-            button.addEventListener('click', function addNewEntry() {
-                var section = button.parentElement.id;
-                layoutSpecSection(C.SECTIONS[section], C.DEFAULT_SPEC[section.toLowerCase()]);
-            });
-        });
-
-        // Hook up the "set" button.
-        doc.getElementById('set').addEventListener('click', setSpec);
-    });
-
-   
-    return me;
-})(window.document, Dominatrix, Constance);
+    public layoutBlessings(blessings: any): void {
+        this.layoutSpecSection(Constance.SECTIONS.BLESSINGS, blessings);
+    }   
+}
