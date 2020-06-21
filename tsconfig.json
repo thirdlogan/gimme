@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "target": "ES2015",
+        "module": "ES2015",
+        "moduleResolution": "Node",
+        "lib": [ 
+            "DOM", 
+            "ES2015", 
+            "ES2015.Iterable", 
+            "DOM.Iterable", 
+            "ScriptHost" 
+        ],
+        "skipLibCheck": true,
+        "strict": true,
+        "alwaysStrict": true,
+        "preserveConstEnums": true,
+        "sourceMap": true
+    },
+    "files": [
+        "lib/BgWindow.ts",
+        "popup/popup.ts",
+        "options/options.ts",
+        "background/Utils.ts",
+        "background/Scraper.ts",
+        "background/Output.ts",
+        "background/Logicker.ts",
+        "background/Digger.ts",
+        "background/EventPage.ts",
+        "background/App.ts"
+    ]
+}
