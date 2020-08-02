@@ -777,14 +777,7 @@ class Digger extends CommonBase {
             return Promise.resolve(new UriPair(thumbUri, zoomPageUri));
         })
         .then((pair) => {
-             // Double-check that we got a good result before reporting success.
-            if (Utils.isKnownMediaFileOrEndpoint(pair.zoomUri)) {
-                return this.reportDigSuccess(pair.thumbUri, pair.zoomUri);
-            }
-            else {
-                this.log.log('Zoomed "image" was actually not a known media type. Not harvesting.');
-                return this.reportDigFailure(pair.thumbUri, pair.zoomUri);
-            }
+            return this.reportDigSuccess(pair.thumbUri, pair.zoomUri);
         })
         .catch((errorMessage) => {
             me.lm('digDeep error: ' + errorMessage);
