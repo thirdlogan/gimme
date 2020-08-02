@@ -7,14 +7,8 @@ As mentioned before, code is there to download video and audio files as well, bu
 
 This extension works with Chrome, Firefox, and Edge -- it can be found in all three extension stores in addition to in this repo.
 
-# v0.4.10
-This release has been focused around refactoring, extracting constants, and the long-planned feature of being able to _Stop_ long-running dig and scrape operations (such as in a 100-page gallery-gallery dig). The refactoring and extracting, updating to using ES6 features (right now with [babel](https://github.com/babel/) and [webpack](https://webpack.js.org/)), is letting the code evolve organically along with the greater features as they come available. Yet also, this process has been directly pointing out fundamental weaknesses of the codebase. 
-
-One of these weaknesses was that I never implemented a _Stop_ button to end a long-running `dig` or `scrape` operation. I had planned to create one way before now, and had baked the notion of there being a _Stop_ button into the very first promise-chains. It doesn't work perfectly, or always quickly. However, it is there. Now if you really want that 500-gallery-gallery-dig to end its resource-plundering and give you control of your browser and network bandwidth back, you can have it with the _Stop_ button.
-
-The download system also got light shined on its shortcomings, so I rearranged and fixed up the download queue. It had missed a link in the promise-chaining, which was causing all the download requests to be sent from gimme almost all-at-once to the browser, causing the whole browser to freeze and become unresponsive for even minutes until it had caught up (and usually aborted most of the requested downloads). This has been fixed, and now a steady stream of downloads gets sent to the browser, spaced by 10 concurrent promise-chains of download channels.
-
-Options/Preferences got broken at some point, with Dominatrix no longer building subforms for object-type configuration values. Fixing that is also in the list of improvements.
+# v0.4.11
+This release focuses on getting _Stop_ to work better, and much more quickly. I must have some `Promise`-based problems, and the `Promise.reject()`s must not be being caught where I thought they were, perhaps being handled multiple times or maybe getting eaten by an over-eager `catch()` or `finally()` thrown on in the middle...
 
 # building
 Execute "npm run pack" in the base directory to build the bundle.js and bundle.js.map files. That's all! Then either zip it up and add it, or just load it as an unpacked extension from the repo root directory. Please note that the html components all reference the bundle.js files only
