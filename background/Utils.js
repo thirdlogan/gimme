@@ -229,7 +229,7 @@ class Utils extends CommonStaticBase {
      */
     static isSupportedMediaUri(uri) {
         return (
-            C.MIMETYPE_RGX.ALLSUPPORTED.test(uri)
+            C.RECOG_RGX.SUPPORTED.test(uri)
         );
     }
 
@@ -264,7 +264,7 @@ class Utils extends CommonStaticBase {
      */
     static sendXhr(method, uri, props, responseType) {
         return new Promise((resolve, reject) => {
-            if (this.stop) { return C.CAN_FN.PR_RJ_STOP(); };
+            if (this.stop) { return reject(C.CAN_FN.PR_RJ_STOP()); };
 
             // Get an unused key for this xhr. The do-while will usually only run one iteration.
             // Then create the object, setting it on the in-flight map and in the xhr local var.
@@ -282,7 +282,7 @@ class Utils extends CommonStaticBase {
             // to nul, then rejects with theStatus.
             var errorHandler = (errorStatus) => {
                 // Log the error.
-                Utils.lm(`XHR Error in sendXhr():\n    ${JSON.stringify(errorStatus)}`);
+                Utils.lm(`XHR Error in sendXhr():\n\t${JSON.stringify(errorStatus)}`);
 
                 // delete the xhr as best we can.
                 delete Utils.xhrsInFlight[xhrId];
@@ -327,6 +327,7 @@ class Utils extends CommonStaticBase {
 
                     // delete the xhr as best we can.
                     delete Utils.xhrsInFlight[xhrId];
+                    thisXhr = null;
                     xhr = null;
                 }
             };
@@ -562,7 +563,7 @@ class Utils extends CommonStaticBase {
         return ((dlDelta) => {
             // Guard against weird, SNAFU blank dlDeltas.
             if (!dlDelta) { 
-                Utils.lm('onChanged called with null/undefined/empty dlDelta. Weird. Returning false.');
+                Utils.lm('download.onChanged called with null/undefined/empty dlDelta. Weird. Returning false.');
                 return false; 
             }
 
