@@ -188,29 +188,47 @@ class Popup extends CommonBase {
                 }
             })
             .then((store) => {
-                // Set the options on the Digger and Logicker through static methods, and on
-                // Output's common instance. 
+                // Migrate to setting the config on a global-static object that does not have
+                // window-affinity. For now, we abuse the constants for this purpose.
                 chrome.runtime.getBackgroundPage(function setSpec(bgWindow) {
-                    var d = bgWindow[C.WIN_PROP.DIGGER_CLASS];
-                    var l = bgWindow[C.WIN_PROP.LOGICKER_CLASS];
-                    var o = bgWindow[C.WIN_PROP.OUTPUT_CLASS].getInstance();
-                    var u = bgWindow[C.WIN_PROP.UTILS_CLASS];
+                    // Set the number of concurrent file option downloads.
+                    C.UTILS_CONF.NUM_DL_CONCURRENT = Utils.parseConfigInt(
+                        store.spec.config.concurrentDls, 
+                        Number.parseInt(C.OPT_CONF.CANNED_CONFIG.concurrentDls)
+                    );
 
-                    C.UTILS_CONF.DL_CHAIN_COUNT = Number.parseInt(store.spec.config.concurrentDls);
+                    // Set the batch size, and number of channels for digging-gallery-galleries.
+                    C.DIG_CONF.BATCH_SIZE = Utils.parseConfigInt(
+                        store.spec.config.dlBatchSize,
+                        Number.parseInt(C.OPT_CONF.CANNED_CONFIG.dlBatchSize)
+                    );
+                    C.DIG_CONF.CHANNELS = Utils.parseConfigInt(
+                        store.spec.config.dlChannels,
+                        Number.parseInt(C.OPT_CONF.CANNED_CONFIG.dlChannels)
+                    );
 
-                    d.setBatchSize(store.spec.config.dlBatchSize);
-                    d.setChannels(store.spec.config.dlChannels);
+                    // Set the min zoom height/width and "known bad image regex".
+                    C.LGK_CONF.MIN_ZOOM_HEIGHT = Utils.parseConfigInt(
+                        store.spec.config.minZoomHeight,
+                        Number.parseInt(C.OPT_CONF.CANNED_CONFIG.minZoomHeight)
+                    );
+                    C.LGK_CONF.MIN_ZOOM_WIDTH = Utils.parseConfigInt(
+                        store.spec.config.minZoomWidth,
+                        Number.parseInt(C.OPT_CONF.CANNED_CONFIG.minZoomWidth)
+                    );
+                    C.LGK_CONF.KNOWN_BAD_IMG_REGEX = Utils.parseConfigRegex(
+                        store.spec.config.knownBadImgRegex,
+                        C.BLANK.MATCH_NONE_REGEX
+                    );
 
-                    l.setMinZoomHeight(store.spec.config.minZoomHeight);
-                    l.setMinZoomWidth(store.spec.config.minZoomWidth);
-                    l.setKnownBadImgRegex(store.spec.config.knownBadImgRegex);
+                    // Set the messages, processings, and blessings for gallery structure.
+                    C.LGK_CONF.MESSAGES = Utils.parseConfigObj(store.spec.messages, C.BLANK.ARR);
+                    C.LGK_CONF.PROCESSINGS = Utils.parseConfigObj(store.spec.processings, C.BLANK.ARR);
+                    C.LGK_CONF.BLESSINGS = Utils.parseConfigObj(store.spec.blessings, C.BLANK.ARR);
 
-                    l.setMessages(store.spec.messages);
-                    l.setProcessings(store.spec.processings);
-                    l.setBlessings(store.spec.blessings);
-
-                    o.setEnableHalfBakedFeatures(
-                        (store.spec.config.enableHalfBakedFeatures === C.OPT_CONF.HALF_BAKED_VAL)
+                    // Enable/disable the half-baked features.
+                    C.OUT_CONF.ENABLE_HALF_BAKED = (
+                        store.spec.config.enableHalfBakedFeatures == C.OPT_CONF.HALF_BAKED_VAL
                     );
                 });
 
@@ -226,7 +244,7 @@ class Popup extends CommonBase {
                 return C.CAN_FN.PR_RS_DEF();
             })
             .catch((err) => {
-                Popup.instance.lm(`Failed to get options/preferences spec. Non-lethal, we just continue with defaults. Error caught is:\n     ${JSON.stringify(err)}`);
+                Popup.instance.lm(`Failed to get options/preferences spec. Non-lethal, we just continue with defaults. Error caught is:\n\t${JSON.stringify(err)}`);
                 return C.CAN_FN.PR_RJ(err);
             }
         );
