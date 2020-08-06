@@ -194,6 +194,9 @@ class Popup extends CommonBase {
                     var d = bgWindow[C.WIN_PROP.DIGGER_CLASS];
                     var l = bgWindow[C.WIN_PROP.LOGICKER_CLASS];
                     var o = bgWindow[C.WIN_PROP.OUTPUT_CLASS].getInstance();
+                    var u = bgWindow[C.WIN_PROP.UTILS_CLASS];
+
+                    C.UTILS_CONF.DL_CHAIN_COUNT = Number.parseInt(store.spec.config.concurrentDls);
 
                     d.setBatchSize(store.spec.config.dlBatchSize);
                     d.setChannels(store.spec.config.dlChannels);
