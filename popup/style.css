@@ -1,14 +1,17 @@
 body {
     color: rgba(0,255,0,1);
     background-color: rgba(0,0,0,1);
-    font-family: monospace;
+    font-family: "Monaco", "Calibri", "Lucida Mono", monospace;
     font-size: 12px;
-    min-height: 300px;
+    min-height: 500px;
     max-height: 1024px;
-    height: 800px;
-    min-width: 600px;
+    min-width: 500px;
+    width: 550px;
     max-width: 1024px;
-    width: 700px;
+    padding: 1em;
+    margin: 0;
+    border: 1px dashed #00ff00;
+    border-bottom: unset;
 }
 
 h1 {
