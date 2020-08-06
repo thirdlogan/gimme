@@ -40,12 +40,6 @@ class Digger extends CommonBase {
 
     // Map of inspection-scraping DiggerScrapeKey -> Scraper Method pairs.
     SCRAPING_TOOLS = {};
- 
-    // Two static, configurable properties. They affect how many batches we dig
-    // concurrently (CHANNELS), and how many we batch together in a promise chain
-    // at any given time (BATCH_SIZE)
-    static BATCH_SIZE = C.DIG_CONF.BATCH_SIZE;
-    static CHANNELS = C.DIG_CONF.CHANNELS;
 
 
     /**
@@ -201,7 +195,7 @@ class Digger extends CommonBase {
         // map getting the remainder. 
         var promises = [];
         var thumbUris = Object.keys(galleryMap);
-        var thumbsPerChannel = Math.floor(thumbUris.length / (Digger.CHANNELS - 1)) || 1;
+        var thumbsPerChannel = Math.floor(thumbUris.length / (C.DIG_CONF.CHANNELS - 1)) || 1;
 
         this.log.log('Digging ' + thumbUris.length + ' scraped thumbnails.');
         this.output.toOut('Now digging ' + thumbUris.length + ' thumbnails found in gallery.');
@@ -261,12 +255,12 @@ class Digger extends CommonBase {
     digNextBatch(galleryMap) {
         var diggingBatch = [];
         var me = this;
-        var startingOutputId = (++this.batchCount) * Digger.BATCH_SIZE;
+        var startingOutputId = (++this.batchCount) * C.DIG_CONF.BATCH_SIZE;
         
         // Set up the output entry, and enter the uriPair's digDeep() execution
         // into the promise batch's array. Skip nulls. 
         var allThumbUris = Object.keys(galleryMap);    
-        for (var i = 0; i < Digger.BATCH_SIZE && allThumbUris.length > 0; i++) {
+        for (var i = 0; i < C.DIG_CONF.BATCH_SIZE && allThumbUris.length > 0; i++) {
             if (me.isSTOP()) {
                 this.lm('Rejecting while building the diggingBatch() chain. ');
                 return Promise.reject(C.ACTION.STOP);
@@ -985,45 +979,6 @@ class Digger extends CommonBase {
         }
 
         return zUri;
-    }
-
-
-    //
-    // .static.
-    //    1. setters for options config of batch size and channels.
-
-
-    /*
-     * Set the gallerygallerydig batch size from the options.
-     */
-    static setBatchSize(size) {
-        console.log(C.LOG_SRC.DIGGER + 'Attempt to set BATCH_SIZE to ' + size);
-
-        if (!!size) {
-            var numSize = parseInt(size+C.ST.E, 10);
-    
-            if (!isNaN(numSize)) {
-                Digger.BATCH_SIZE = numSize;
-                console.log(C.LOG_SRC.DIGGER + 'Successfully set BATCH_SIZE to ' + numSize + C.ST.E);
-            }
-        }
-    }
-
-
-    /*
-     * Set the gallerygallerydig number of channels from the options.
-     */
-    static setChannels(size) {
-        console.log(C.LOG_SRC.DIGGER + 'Attempt to set CHANNELS to ' + size);
-
-        if (!!size) {
-            var numSize = parseInt(size+C.ST.E, 10);
-
-            if (!isNaN(numSize)) {
-                Digger.CHANNELS = numSize;
-                console.log(C.LOG_SRC.DIGGER + 'Successfully set CHANNELS to ' + numSize + C.ST.E);
-            }
-        }
     }
 }
 

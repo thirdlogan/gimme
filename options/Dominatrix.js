@@ -47,12 +47,12 @@ class Dominatrix extends CommonStaticBase {
         var div = document.createElement(C.SEL_PROP.DIV);
 
         if (isSubEntry) {
-            div.id = C.DOMX_CONF.SUB_ENTRY_DIV_PREFIX + (Dominatrix.SubEntryCounter++);
-            div.className = C.DOMX_CONF.SUB_ENTRY_CLASS;
+            div.id = C.DX_CONF.SUB_ENTRY_DIV_PREFIX + (Dominatrix.SubEntryCounter++);
+            div.className = C.DX_CONF.SUB_ENTRY_CLASS;
         }
         else {
-            div.id = C.DOMX_CONF.ENTRY_DIV_PREFIX + (Dominatrix.EntryCounter++);
-            div.className = C.DOMX_CONF.ENTRY_CLASS;
+            div.id = C.DX_CONF.ENTRY_DIV_PREFIX + (Dominatrix.EntryCounter++);
+            div.className = C.DX_CONF.ENTRY_CLASS;
         }
 
         if (Array.isArray(values)) {
@@ -64,7 +64,7 @@ class Dominatrix extends CommonStaticBase {
                 }
 
                 var label = (!!value.label ? document.createElement(C.SEL_PROP.LABEL) : false);
-                var valueId = div.id + C.ST.U + C.DOMX_CONF.VALUE_PREFIX + i;
+                var valueId = div.id + C.ST.U + C.DX_CONF.VALUE_PREFIX + i;
 
                 // Create and append the label if we were told to label this.
                 if (Utils.exists(label)) {
@@ -114,8 +114,8 @@ class Dominatrix extends CommonStaticBase {
             // Create a delete button for the entry/subentry. If we're dealing with the first
             // subentry of a list of subentries, do not create a delete button for it.
             var deleteButton = document.createElement('button');
-            deleteButton.textContent = C.DOMX_CONF.DELETE_BUTTON_TEXT;
-            deleteButton.className = C.DOMX_CONF.DELETE_BUTTON_CLASS;
+            deleteButton.textContent = C.DX_CONF.DELETE_BUTTON_TEXT;
+            deleteButton.className = C.DX_CONF.DELETE_BUTTON_CLASS;
             deleteButton.addEventListener(C.EVT.CLICK, () => {
                 // Remove the subentry title (like 'actions'), then the hidden input
                 // for the subentry, then the subentry itself.
@@ -127,9 +127,9 @@ class Dominatrix extends CommonStaticBase {
 
                 // If there is only 1 subentry left, find it and hide its delete button.
                 // otherwise, show all the subentries' delete buttons.
-                var remainingSubentries = section.querySelectorAll(C.DOMX_CONF.SCOPE_DIV_D_SUBENTRY_SEL);
+                var remainingSubentries = section.querySelectorAll(C.DX_CONF.SCOPE_DIV_D_SUBENTRY_SEL);
                 if (remainingSubentries.length === 1) {
-                    var deleteButton = remainingSubentries[0].querySelector(C.DOMX_CONF.SCOPE_BUTTON_D_DELETE_BUTTON_SEL);
+                    var deleteButton = remainingSubentries[0].querySelector(C.DX_CONF.SCOPE_BUTTON_D_DELETE_BUTTON_SEL);
                     deleteButton.style.display = C.CSS_V.DISPLAY.NONE;
                 }
             });
@@ -169,8 +169,8 @@ class Dominatrix extends CommonStaticBase {
 
         // Build the 'add subentry' button, and insert it into the <div>.
         var addSubEntry = document.createElement('button');
-        addSubEntry.id = C.DOMX_CONF.ADD_SUB_ENTRY_PREFIX + idx;
-        addSubEntry.className = C.DOMX_CONF.ADD_SUB_ENTRY_CLASS;
+        addSubEntry.id = C.DX_CONF.ADD_SUB_ENTRY_PREFIX + idx;
+        addSubEntry.className = C.DX_CONF.ADD_SUB_ENTRY_CLASS;
         addSubEntry.textContent = 'add subentry';
         rootNode.insertBefore(addSubEntry, refNode);                                                
 
@@ -180,7 +180,7 @@ class Dominatrix extends CommonStaticBase {
         addSubEntry.addEventListener('click', () => {
             // Create the label.
             var newLabel = (!!val.label ? document.createElement('label') : false);
-            var newValueId = div.id + '_' + C.DOMX_CONF.VALUE_PREFIX + (idx + 1);
+            var newValueId = div.id + '_' + C.DX_CONF.VALUE_PREFIX + (idx + 1);
             if (!!newLabel) {
                 newLabel.id = 'label_' + newValueId
                 newLabel.textContent = val.label;
@@ -201,9 +201,9 @@ class Dominatrix extends CommonStaticBase {
             newInput.value = addedSubentryId;
 
             // Unhide all the subentries' delete buttons in the section.
-            var deleteButtons = div.parentNode.querySelectorAll(':scope button.' + C.DOMX_CONF.DELETE_BUTTON_CLASS);
+            var deleteButtons = div.parentNode.querySelectorAll(':scope button.' + C.DX_CONF.DELETE_BUTTON_CLASS);
             deleteButtons.forEach((dButton) => {
-                if (dButton.parentNode.className === C.DOMX_CONF.SUB_ENTRY_CLASS) {
+                if (dButton.parentNode.className === C.DX_CONF.SUB_ENTRY_CLASS) {
                     dButton.style.display = C.ST.E;
                 }
             });
@@ -286,7 +286,7 @@ class Dominatrix extends CommonStaticBase {
                 }
 
                 var subEntry = input.nextSibling;
-                if (!!subEntry && subEntry.className === C.DOMX_CONF.SUB_ENTRY_CLASS) {
+                if (!!subEntry && subEntry.className === C.DX_CONF.SUB_ENTRY_CLASS) {
                     entry[input.dataset.key].push(Dominatrix.getEntry(subEntry));
                 }
             }
@@ -307,7 +307,7 @@ class Dominatrix extends CommonStaticBase {
         
         // Get all of the div.ENTRY_CLASS dom nodes.
         section.childNodes.forEach((child) => {
-            if (child.nodeName === 'DIV' && child.className === C.DOMX_CONF.ENTRY_CLASS) {
+            if (child.nodeName === 'DIV' && child.className === C.DX_CONF.ENTRY_CLASS) {
                 divs.push(child);
             }
         });

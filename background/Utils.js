@@ -442,7 +442,7 @@ class Utils extends CommonStaticBase {
             delete Utils.dlCallbacks[prp];
         }
     
-        for (var i1 = 0; i1 < C.UTILS_CONF.DL_CHAIN_COUNT; i1++) {
+        for (var i1 = 0; i1 < C.UTILS_CONF.NUM_DL_CONCURRENT; i1++) {
             Utils.dlChains.push(Promise.resolve(true));
         }
     }
@@ -467,7 +467,7 @@ class Utils extends CommonStaticBase {
         }
 
         // We're round-robin-ing our dlChains. 
-        var dlIndex = Utils.dlCounter % C.UTILS_CONF.DL_CHAIN_COUNT;
+        var dlIndex = Utils.dlCounter % C.UTILS_CONF.NUM_DL_CONCURRENT;
         Utils.dlCounter++;
         var num = Utils.dlCounter + 0;
         
@@ -894,6 +894,57 @@ class Utils extends CommonStaticBase {
             bgDoc.body.appendChild(iframe);
         });
     };
+
+
+    /**
+     * Do a parseInt, with a fallback to an optional default value.
+     * If no defaultVal to fall back to, fallback to C.BLANK.DEF_INT.
+     * 
+     * @param {any} confVal 
+     * @param {int} defaultVal 
+     */
+    static parseConfigInt(confVal, defaultVal) {
+        if (this.exists(confVal)) {
+            var numVal = Number.parseInt(`${confVal}`, 10);
+            
+            return (
+                isNaN(numVal) ?
+                (this.exists(defaultVal) ? defaultVal : C.BLANK.DEF_INT) :
+                numVal
+            );
+        }
+    }
+
+
+    /**
+     * Get an object representation of the confVal.
+     * 
+     * @param {any} confVal 
+     */
+    static parseConfigObj(confVal, defaultVal) {
+        return JSON.parse(
+            JSON.stringify(
+                this.exists(confVal) ?
+                confVal : 
+                (this.exists(defaultVal) ? defaultVal : C.BLANK.OBJ)
+            )
+        );
+    }
+
+
+    /**
+     * Get a Regex object from the config string.
+     * 
+     * @param {string} confVal 
+     * @param {string} defaultVal 
+     */
+    static parseConfigRegex(confVal, defaultVal) {
+        return (
+            this.exists(confVal) ?
+            new RegExp(confVal, 'g') :
+            new RegExp((this.exists(defaultVal) ? defaultVal : C.BLANK.MATCH_NONE_RX), 'g')
+        );
+    }
 
 
     /**

@@ -20,50 +20,9 @@ import {
 class Logicker extends CommonStaticBase {
     // service object
     static hasSpecialRules = false;
-    static knownBadImgRegex = /^SUPER_FAKE_NOT_FOUND_IN_NATURE_ONLY_ZOOL$/;
-    static messages = [];
-    static processings = [];
-    static blessings = [];
     static mnModel = undefined;
     static loadingModel = false;
     static modelLoadPromiseChain = Promise.resolve(true);
-
-    // Configurable options.
-    static MinZoomHeight = C.L_CONF.MIN_ZOOM_HEIGHT;
-    static MinZoomWidth = C.L_CONF.MIN_ZOOM_WIDTH;
-
-
-    /**
-     * Methods for setting the preferences options on the Logicker.
-     */
-    static setMessages(messages) {
-        Logicker.messages = JSON.parse(JSON.stringify(messages));
-    }
-    static setProcessings(processings) {
-        Logicker.processings = JSON.parse(JSON.stringify(processings));
-    }
-    static setBlessings(blessings) {
-        Logicker.blessings = JSON.parse(JSON.stringify(blessings));
-    }
-    static setMinZoomHeight(height) {
-        var zoomHeight = parseInt(height + C.ST.E, 10);
-
-        if (!isNaN(zoomHeight)) {
-            Logicker.MinZoomHeight = zoomHeight;
-        }
-    }
-    static setMinZoomWidth(width) {
-        var zoomWidth = parseInt(width + C.ST.E, 10);
-
-        if (!isNaN(zoomWidth)) {
-            Logicker.MinZoomWidth = zoomWidth;
-        }
-    }
-    static setKnownBadImgRegex(regexString) {
-        if (!!regexString) {
-            Logicker.knownBadImgRegex =  new RegExp(regexString);
-        }
-    }
 
 
     /**
@@ -76,6 +35,7 @@ class Logicker extends CommonStaticBase {
         }
     }
 
+    
     /**
      * Load the mobilenet image-matching model, and do it only once per instance.
      * Returns a promise resolving to our copy of this model.
@@ -143,11 +103,11 @@ class Logicker extends CommonStaticBase {
             var originalWidth = imgElement.width;
     
             // Set the height and width to be the size that mobilenet expects.
-            imgElement.height = C.L_CONF.IMAGE_SIZE;
-            imgElement.width = C.L_CONF.IMAGE_SIZE;
+            imgElement.height = C.LGK_CONF.IMAGE_SIZE;
+            imgElement.width = C.LGK_CONF.IMAGE_SIZE;
 
             // Use mobilenet to get a classification array of objects.
-            Logicker.mnModel.classify(imgElement, C.L_CONF.CLASSIFICATIONS).then((imgClassifications) => {
+            Logicker.mnModel.classify(imgElement, C.LGK_CONF.CLASSIFICATIONS).then((imgClassifications) => {
                 // Restore the img's height and width.
                 imgElement.height = originalHeight;
                 imgElement.width = originalWidth;
@@ -176,7 +136,7 @@ class Logicker extends CommonStaticBase {
         return new Promise((resolve, reject) => {
             var img = new Image();
             img.src = src;
-            img.crossOrigin = C.L_CONF.ANONYMOUS;
+            img.crossOrigin = C.LGK_CONF.ANONYMOUS;
 
             img.onerror = (e) => {
                 resolve(null);
@@ -201,8 +161,8 @@ class Logicker extends CommonStaticBase {
         var me = this;
 
         // Look through the blessings for one that matches this thumbUri.
-        if (Logicker.blessings.length !== -1) {
-            Logicker.blessings.forEach((blessing) => {
+        if (C.LGK_CONF.BLESSINGS.length !== -1) {
+            C.LGK_CONF.BLESSINGS.forEach((blessing) => {
                 //me.log.log('applying blessing: ' + JSON.stringify(blessing));
 
                 // If the thumbUri matches the pattern and we can find the blessed element,
@@ -350,8 +310,8 @@ class Logicker extends CommonStaticBase {
     static isKnownBadImg(src) {
         var isBad = false;
 
-        if (!!Logicker.knownBadImgRegex) {
-            if (Logicker.knownBadImgRegex.test(src)) {
+        if (!!C.LGK_CONF.KNOWN_BAD_IMG_REGEX) {
+            if (C.LGK_CONF.KNOWN_BAD_IMG_REGEX.test(src)) {
                 isBad = true;
             }
         }
@@ -365,7 +325,7 @@ class Logicker extends CommonStaticBase {
      * Any object with the "width" and "height" properties can be used.
      */
     static isZoomSized(obj) {
-        return !(obj.height < Logicker.MinZoomHeight && obj.width < Logicker.MinZoomWidth);
+        return !(obj.height < C.LGK_CONF.MIN_ZOOM_HEIGHT && obj.width < C.LGK_CONF.MIN_ZOOM_WIDTH);
     }
 
 
@@ -397,7 +357,7 @@ class Logicker extends CommonStaticBase {
                 var imgs = doc.querySelectorAll(C.SEL_PROP.IMG);
                 var imgPromises = [];
                 var largestImgSrc = undefined;
-                var largestDims = new Dimensions(Logicker.MinZoomHeight, Logicker.MinZoomWidth);
+                var largestDims = new Dimensions(C.LGK_CONF.MIN_ZOOM_HEIGHT, C.LGK_CONF.MIN_ZOOM_WIDTH);
 
                 // Check every image for similarities.
                 //me.log.log('Checking ${imgs.length} images for TF similarity to the test image.`);
@@ -413,8 +373,8 @@ class Logicker extends CommonStaticBase {
                     imgPromises.push(
                         new Promise((resolve, reject) => {
                             let testImg = new Image(
-                                C.L_CONF.IMAGE_SIZE, 
-                                C.L_CONF.IMAGE_SIZE
+                                C.LGK_CONF.IMAGE_SIZE, 
+                                C.LGK_CONF.IMAGE_SIZE
                             );
 
                             // Must use the "function" keyword so "this" points to the image.
@@ -461,7 +421,7 @@ class Logicker extends CommonStaticBase {
                                     classifications.forEach((cls) => {
                                         thumbClassifications.forEach((tCls) => {
                                             if (tCls.className.indexOf(cls.className) != -1) {
-                                                if (Math.abs(cls.probability - tCls.probability) < C.L_CONF.SCORE_CUTOFF) {
+                                                if (Math.abs(cls.probability - tCls.probability) < C.LGK_CONF.SCORE_CUTOFF) {
                                                     classAgreements.push(cls.className);
                                                 } 
                                             }
@@ -626,8 +586,8 @@ class Logicker extends CommonStaticBase {
 
         // Check all of the special messaging rules for guidance in what to use for the
         // thumb element and uri, and the zoom page anchor element and uri.
-        for (var i = 0; i < Logicker.messages.length; i++) {
-            var m = Logicker.messages[i];
+        for (var i = 0; i < C.LGK_CONF.MESSAGES.length; i++) {
+            var m = C.LGK_CONF.MESSAGES[i];
             
             this.lm('working on message: ' + JSON.stringify(m));
 
@@ -662,8 +622,8 @@ class Logicker extends CommonStaticBase {
         var newGalleryMap = null;
 
         // Utilize processings hints from the Options page.
-        for (var i=0; i < Logicker.processings.length; i++) {
-            var p = Logicker.processings[i];
+        for (var i=0; i < C.LGK_CONF.PROCESSINGS.length; i++) {
+            var p = C.LGK_CONF.PROCESSINGS[i];
             var me = this;
 
             //this.lm('working on processing: ' + JSON.stringify(p));
@@ -835,7 +795,7 @@ class Logicker extends CommonStaticBase {
         // Do a url extraction from functions or javascript hrefs.
         if (typeof value === 'function' || /^(java)?script\:/.test(value)) {
             var text = value.toString();
-            value = C.L_CONF.URL_EXTRACTING_REGEX.exec(text);
+            value = C.LGK_CONF.URL_EXTRACTING_REGEX.exec(text);
 
             if (!!value && value.length) {
                 value = value[0];
